@@ -1,155 +1,120 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
-import { List, X, Phone } from "@phosphor-icons/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { List, X } from "@phosphor-icons/react";
 
 const navLinks = [
-  { label: "Experience", href: "#experience" },
+  { label: "Reserve", href: "#hero" },
+  { label: "Atmosphere", href: "#about" },
+  { label: "Tasting Menu", href: "#menu" },
+  { label: "Nightlife", href: "#events" },
   { label: "Gallery", href: "#gallery" },
-  { label: "Menu", href: "#menu" },
-  { label: "Events", href: "#events" },
-  { label: "Contact", href: "#contact" },
 ];
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 80);
-  });
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
     };
-  }, [mobileOpen]);
-
-  const handleNavClick = (href: string) => {
-    setMobileOpen(false);
-    const el = document.querySelector(href);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
-      <motion.nav
-        className={`fixed top-0 left-0 right-0 z-[150] transition-colors duration-500 ${
-          isScrolled ? "nav-solid" : "bg-transparent"
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
+          scrolled 
+            ? "bg-bg-primary/70 backdrop-blur-xl border-border-subtle py-4" 
+            : "bg-transparent border-transparent py-6"
         }`}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 1 }}
       >
-        <div className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-[80px]">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex justify-between items-center">
           {/* Logo */}
-          <a
-            href="#"
-            className="flex flex-col leading-none group"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-          >
-            <span className="font-[var(--font-display)] text-3xl font-normal tracking-wide uppercase text-text-primary group-hover:text-accent-amber transition-colors">
-              Stella
-            </span>
+          <a href="#" className="font-display text-2xl md:text-3xl text-text-primary tracking-wide relative z-[60]">
+            Stella
           </a>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-10">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(link.href);
-                }}
-                className="group relative text-sm font-semibold tracking-widest uppercase text-text-secondary py-2"
-              >
-                <span className="relative z-10 group-hover:text-text-primary transition-colors duration-300">
-                  {link.label}
-                </span>
-                {/* Animated underline wipe */}
-                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-accent-amber scale-x-0 origin-right transition-transform duration-300 ease-out group-hover:scale-x-100 group-hover:origin-left" />
-              </a>
-            ))}
-          </div>
-
-          {/* Reserve CTA + Mobile Toggle */}
-          <div className="flex items-center gap-6">
-            <motion.a
-              href="https://wa.me/919001711617?text=Hi%2C%20I%27d%20like%20to%20reserve%20a%20table%20at%20Stella."
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`hidden md:inline-flex text-xs font-semibold tracking-widest uppercase items-center gap-2 border-b border-accent-amber pb-1 text-text-primary hover:text-accent-amber transition-colors ${
-                isScrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-              } transition-all duration-500`}
-            >
-              Reserve a Table
-            </motion.a>
-
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2 text-text-primary relative z-[160]"
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <X size={28} /> : <List size={28} />}
-            </button>
-          </div>
-        </div>
-      </motion.nav>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            className="fixed inset-0 z-[140] bg-bg-primary flex flex-col items-center justify-center gap-8 px-6"
-            initial={{ opacity: 0, clipPath: "circle(0% at 100% 0%)" }}
-            animate={{ opacity: 1, clipPath: "circle(150% at 100% 0%)" }}
-            exit={{ opacity: 0, clipPath: "circle(0% at 100% 0%)" }}
-            transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
-          >
+          <nav className="hidden md:flex gap-10 items-center">
             {navLinks.map((link, i) => (
-              <motion.a
-                key={link.href}
+              <a
+                key={i}
                 href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(link.href);
-                }}
-                className="font-[var(--font-display)] text-5xl md:text-6xl tracking-wide uppercase text-text-primary hover:text-accent-amber transition-colors"
-                initial={{ opacity: 0, y: 40, rotateX: -45 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: 0.2 + i * 0.05, duration: 0.5, ease: "backOut" }}
-                style={{ perspective: "400px" }}
+                className="text-sm font-medium text-text-secondary hover:text-accent-amber transition-colors tracking-wide"
               >
                 {link.label}
-              </motion.a>
+              </a>
             ))}
-            <motion.a
-              href="tel:+919001711617"
-              className="btn-primary mt-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
+            <a href="https://wa.me/919001711617" className="btn-primary py-2 px-6 text-xs rounded-full">
+              Book Table
+            </a>
+          </nav>
+
+          {/* Mobile Toggle */}
+          <button 
+            className="md:hidden relative z-[60] text-text-primary p-2 -mr-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={28} /> : <List size={28} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "-100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "-100%" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-50 bg-bg-secondary/95 backdrop-blur-2xl flex flex-col justify-center px-8"
+          >
+            <nav className="flex flex-col gap-8">
+              {navLinks.map((link, i) => (
+                <motion.a
+                  key={i}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + (i * 0.1), duration: 0.5, ease: "easeOut" }}
+                  className="font-display text-5xl sm:text-6xl text-text-primary hover:text-accent-amber transition-colors"
+                >
+                  {link.label}
+                </motion.a>
+              ))}
+              <motion.a 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                href="https://wa.me/919001711617" 
+                className="mt-8 btn-primary text-center py-4 w-full"
+              >
+                Book Your Table
+              </motion.a>
+            </nav>
+            
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="absolute bottom-12 left-8 right-8 flex justify-between items-end border-t border-border-subtle pt-6"
             >
-              <span className="flex items-center gap-2">
-                <Phone size={20} weight="bold" />
-                Call to Book
-              </span>
-            </motion.a>
+              <div className="font-eyebrow text-xs text-text-muted">
+                Kota, RJ
+              </div>
+              <div className="text-right text-sm text-text-secondary">
+                8th Floor, Akash Mall<br/>
+                +91 90017 11617
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

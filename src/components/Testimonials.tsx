@@ -1,149 +1,94 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Star, Quotes } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
-
-gsap.registerPlugin(ScrollTrigger);
+import { Quotes } from "@phosphor-icons/react";
 
 const testimonials = [
   {
-    quote:
-      "Hands down the best rooftop in Kota. The view at sunset is unreal, and their old fashioned is top-tier.",
-    name: "Arjun Mehra",
-    role: "Regular Patron",
-    rating: 5,
+    quote: "Easily the best rooftop experience in Kota. The ambiance, the crafted cocktails, and that skyline view—absolutely unmatched.",
+    author: "Rohan M.",
+    role: "Local Guide"
   },
   {
-    quote:
-      "Friday DJ nights here hit different. Great music, good crowd, and the vibe is always on point.",
-    name: "Priya Sharma",
-    role: "Nightlife Enthusiast",
-    rating: 5,
+    quote: "Stella has redefined nightlife for us. The acoustics during their DJ nights are incredible, and the truffle kulcha is a must-try.",
+    author: "Priya S.",
+    role: "Food Critic"
   },
   {
-    quote:
-      "We hosted a birthday here and the staff went above and beyond. Food was incredible, especially the tandoori lamb chops.",
-    name: "Rohit Gupta",
-    role: "Event Host",
-    rating: 5,
-  },
-  {
-    quote:
-      "Came for the craft beer, stayed for the vibe. The rooftop seating with the city lights is chef's kiss.",
-    name: "Sneha Patel",
-    role: "Food & Drink Blogger",
-    rating: 5,
-  },
+    quote: "From the sunset golden hour to the midnight vibe, the transition is flawless. Excellent service and premium crowd.",
+    author: "Vikram K.",
+    role: "Entrepreneur"
+  }
 ];
 
 export default function Testimonials() {
-  const [current, setCurrent] = useState(0);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-
-  const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % testimonials.length);
-  }, []);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setInterval(next, 6000);
-    return () => clearInterval(timer);
-  }, [next]);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    
     const ctx = gsap.context(() => {
-      if (headingRef.current) {
-        const splitHeading = new SplitType(headingRef.current, { types: "chars" });
-        gsap.from(splitHeading.chars, {
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: "top 85%",
-          },
-          opacity: 0,
-          scale: 0.5,
-          stagger: 0.05,
-          duration: 0.8,
-          ease: "back.out(2)",
-        });
-      }
-    }, sectionRef);
+      gsap.from(".testimonial-card", {
+        y: 40,
+        opacity: 0,
+        stagger: 0.2,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+        }
+      });
+    }, containerRef);
     return () => ctx.revert();
   }, []);
 
-  const t = testimonials[current];
-
   return (
-    <section ref={sectionRef} className="section-padding bg-bg-secondary relative overflow-hidden border-t border-border-strong">
-      {/* Decorative glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-accent-amber/5 blur-[120px] pointer-events-none" />
-
-      <div className="relative z-10 max-w-[900px] mx-auto px-6 md:px-10 text-center">
-        
-        <span className="eyebrow block mb-4">The Word</span>
-        <h2 ref={headingRef} className="font-[var(--font-display)] text-5xl md:text-7xl uppercase mb-12">
-          What <span className="text-accent-amber">They Say</span>
-        </h2>
-
-        {/* Carousel */}
-        <div className="min-h-[300px] flex items-center justify-center relative">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current}
-              initial={{ opacity: 0, filter: "blur(10px)", scale: 0.9 }}
-              animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
-              exit={{ opacity: 0, filter: "blur(10px)", scale: 1.1 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 flex flex-col items-center justify-center"
-            >
-              <Quotes size={48} weight="fill" className="text-accent-amber/20 mb-6" />
-              
-              {/* Quote */}
-              <p className="text-xl md:text-3xl lg:text-4xl font-[var(--font-display)] tracking-wide leading-[1.2] text-text-primary uppercase mb-8 max-w-[20ch] mx-auto">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-
-              {/* Attribution */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1 border-r border-border-strong pr-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} size={14} weight="fill" className="text-accent-gold" />
-                  ))}
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-bold text-text-primary uppercase tracking-widest">
-                    {t.name}
-                  </p>
-                  <p className="text-[10px] text-accent-amber uppercase tracking-widest mt-0.5">
-                    {t.role}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+    <section ref={containerRef} className="py-24 md:py-32 bg-bg-secondary relative overflow-hidden">
+      
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+          <div>
+            <span className="font-eyebrow text-xs tracking-[0.2em] text-accent-amber mb-6 block">
+              The Word
+            </span>
+            <h2 className="font-display text-5xl md:text-7xl lg:text-[5rem] leading-[0.9] text-text-primary tracking-tight">
+              What They <br/>
+              <span className="text-accent-amber italic font-light">Say.</span>
+            </h2>
+          </div>
+          
+          <div className="hidden md:flex gap-2">
+            {/* Desktop decorative element */}
+            <div className="h-[1px] w-32 bg-border-strong self-center mr-4" />
+          </div>
         </div>
 
-        {/* Progress Dots */}
-        <div className="flex items-center justify-center gap-3 mt-12">
-          {testimonials.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className="group relative w-12 h-12 flex items-center justify-center"
-              aria-label={`Go to testimonial ${i + 1}`}
+        {/* Mobile swipable, Desktop grid */}
+        <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory hide-scrollbar pb-8 -mx-6 px-6 md:mx-0 md:px-0">
+          {testimonials.map((t, i) => (
+            <div 
+              key={i} 
+              className="testimonial-card shrink-0 w-[85vw] sm:w-[60vw] md:w-auto snap-center glass-panel p-8 md:p-10 flex flex-col justify-between h-full min-h-[300px]"
             >
-              <div className={`h-[2px] transition-all duration-500 bg-accent-amber ${
-                i === current ? "w-8 opacity-100" : "w-4 opacity-30 group-hover:opacity-70 group-hover:w-6"
-              }`} />
-            </button>
+              <div>
+                <Quotes size={32} weight="fill" className="text-accent-amber/40 mb-6" />
+                <p className="text-text-primary font-light text-lg md:text-xl leading-relaxed">
+                  "{t.quote}"
+                </p>
+              </div>
+              <div className="mt-8 pt-6 border-t border-border-subtle">
+                <div className="font-sans text-text-primary font-medium">{t.author}</div>
+                <div className="font-eyebrow text-[10px] text-text-muted mt-1">{t.role}</div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </section>
   );
 }

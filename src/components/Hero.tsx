@@ -4,174 +4,143 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import SplitType from "split-type";
-import { CaretDown } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { ArrowRight, StarFour } from "@phosphor-icons/react";
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const taglineRef = useRef<HTMLParagraphElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const imageWrapperRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!headlineRef.current || !taglineRef.current) return;
+    if (!titleRef.current || !subtitleRef.current) return;
 
-    // Split text
-    const splitHeadline = new SplitType(headlineRef.current, { types: "chars,words" });
-    const splitTagline = new SplitType(taglineRef.current, { types: "words" });
+    const titleSplit = new SplitType(titleRef.current, { types: "lines,words,chars" });
+    const subtitleSplit = new SplitType(subtitleRef.current, { types: "lines,words" });
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 1.5 }); // Wait for loader
+      const tl = gsap.timeline({ delay: 0.5 });
 
-      // Initial state
-      gsap.set(splitHeadline.chars, { yPercent: 100, opacity: 0 });
-      gsap.set(splitTagline.words, { y: 20, opacity: 0 });
-      gsap.set(ctaRef.current, { y: 20, opacity: 0 });
-      
-      // bg scale in
-      gsap.fromTo(bgRef.current, 
-        { scale: 1.1, opacity: 0 }, 
-        { scale: 1, opacity: 1, duration: 2, ease: "power3.out" }
-      );
+      gsap.set(titleSplit.chars, { y: 100, opacity: 0, rotateX: -40 });
+      gsap.set(subtitleSplit.words, { y: 20, opacity: 0 });
+      gsap.set(imageWrapperRef.current, { scale: 1.2, opacity: 0, filter: "blur(20px)" });
+      gsap.set(ctaRef.current, { y: 30, opacity: 0 });
 
-      // Headline
-      tl.to(splitHeadline.chars, {
-        yPercent: 0,
+      tl.to(imageWrapperRef.current, {
+        scale: 1,
         opacity: 1,
-        stagger: 0.05,
-        duration: 1,
-        ease: "power4.out",
+        filter: "blur(0px)",
+        duration: 2,
+        ease: "power4.out"
       })
-      // Tagline
-      .to(splitTagline.words, {
+      .to(titleSplit.chars, {
         y: 0,
         opacity: 1,
-        stagger: 0.05,
-        duration: 0.8,
-        ease: "power3.out",
-      }, "-=0.6")
-      // CTAs
+        rotateX: 0,
+        stagger: 0.02,
+        duration: 1.2,
+        ease: "power4.out"
+      }, "-=1.5")
+      .to(subtitleSplit.words, {
+        y: 0,
+        opacity: 1,
+        stagger: 0.03,
+        duration: 1,
+        ease: "power3.out"
+      }, "-=1.2")
       .to(ctaRef.current, {
         y: 0,
         opacity: 1,
-        duration: 0.8,
-        ease: "power3.out",
-      }, "-=0.6");
+        duration: 1,
+        ease: "power3.out"
+      }, "-=1");
 
-      // Scroll parallax
-      gsap.to(bgRef.current, {
-        scale: 1.15,
-        opacity: 0.3,
-        yPercent: 20,
+      // Parallax effect on scroll
+      gsap.to(imageWrapperRef.current, {
+        yPercent: 30,
         ease: "none",
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
           end: "bottom top",
           scrub: true,
-        },
+        }
       });
-      
     }, containerRef);
 
     return () => {
-      splitHeadline.revert();
-      splitTagline.revert();
+      titleSplit.revert();
+      subtitleSplit.revert();
       ctx.revert();
     };
   }, []);
 
   return (
-    <section
-      ref={containerRef}
-      id="hero"
-      className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden"
-    >
-      {/* Background Image */}
-      <div
-        ref={bgRef}
-        className="absolute inset-0 z-0"
-      >
-        <Image
-          src="/images/hero-rooftop.jpg"
-          alt="Stella rooftop bar overlooking city skyline at night"
-          fill
-          priority
-          quality={90}
-          className="object-cover"
-          sizes="100vw"
-        />
-      </div>
-
-      {/* Dark gradient overlay & Vignette */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-bg-primary via-bg-primary/50 to-transparent" />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-bg-primary/70 to-transparent" />
-      <div className="vignette absolute inset-0 z-[1]" />
-
-      {/* Content */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-10 w-full pt-20">
-        <div className="max-w-3xl">
-          {/* Eyebrow */}
-          <div className="overflow-hidden mb-4">
-            <span className="block text-xs md:text-sm tracking-[0.3em] uppercase text-accent-amber font-bold">
-              Est. 2024
-            </span>
-          </div>
-          
-          {/* Wordmark reveal */}
-          <div className="overflow-hidden mb-6 py-2">
-            <h1
-              ref={headlineRef}
-              className="text-7xl md:text-8xl lg:text-[140px] font-[var(--font-display)] tracking-normal leading-[0.8] text-text-primary uppercase drop-shadow-2xl"
-              style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0% 100%)" }}
-            >
-              STELLA
-            </h1>
-          </div>
-
-          {/* Tagline */}
-          <p
-            ref={taglineRef}
-            className="text-lg md:text-2xl text-text-secondary font-medium tracking-wide mb-10 max-w-lg"
-          >
-            Kota&apos;s Rooftop. Redefined.
-          </p>
-
-          {/* CTAs */}
-          <div ref={ctaRef} className="flex flex-wrap gap-4">
-            <a
-              href="https://wa.me/919001711617?text=Hi%2C%20I%27d%20like%20to%20reserve%20a%20table%20at%20Stella."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary"
-            >
-              <span className="relative z-10 flex items-center gap-2">Reserve a Table</span>
-            </a>
-            <a href="#menu" className="btn-ghost">
-              View Menu
-            </a>
-          </div>
+    <section ref={containerRef} className="relative min-h-[100dvh] flex items-center pt-24 pb-12 overflow-hidden bg-bg-primary">
+      {/* Background Image Wrapper */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div ref={imageWrapperRef} className="relative w-full h-full">
+          <Image
+            src="/images/hero-rooftop.jpg"
+            alt="Stella Rooftop Lounge"
+            fill
+            priority
+            className="object-cover opacity-60 mix-blend-screen"
+            sizes="100vw"
+          />
+          {/* Subtle gradient overlay to blend image into background */}
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-transparent to-bg-primary opacity-90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-primary via-bg-primary/80 to-transparent" />
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 3, duration: 0.8 }}
-      >
-        <span className="text-[10px] tracking-[0.25em] uppercase text-text-muted">
-          Scroll
-        </span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-        >
-          <CaretDown size={18} className="text-accent-amber" weight="bold" />
-        </motion.div>
-      </motion.div>
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col justify-center h-full">
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end w-full mb-8 md:mb-16 gap-8">
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-3 mb-6 md:mb-10 overflow-hidden">
+              <StarFour weight="fill" className="text-accent-amber animate-pulse" size={16} />
+              <span className="font-eyebrow text-xs md:text-sm tracking-[0.3em] text-accent-amber">Kota&apos;s Highest Point</span>
+            </div>
+            
+            <h1 ref={titleRef} className="font-display text-7xl md:text-[9rem] lg:text-[11rem] leading-[0.85] tracking-tight text-text-primary mb-6" style={{ perspective: "1000px" }}>
+              Meet The<br/>
+              <span className="text-accent-amber italic font-light">Skyline.</span>
+            </h1>
+          </div>
+          
+          <div className="max-w-xs md:max-w-sm mb-4 md:mb-12">
+            <p ref={subtitleRef} className="text-base md:text-xl text-text-secondary font-light leading-relaxed mb-8">
+              A cinematic escape above the city. Handcrafted cocktails, curated sounds, and an atmosphere built for the extraordinary.
+            </p>
+            
+            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4">
+              <a href="#booking" className="group flex items-center justify-between gap-6 bg-text-primary text-bg-primary px-8 py-4 rounded-full font-medium hover:bg-accent-amber transition-colors duration-500 w-fit">
+                <span>Reserve Table</span>
+                <span className="bg-bg-primary text-text-primary p-2 rounded-full group-hover:bg-text-primary group-hover:text-bg-primary transition-colors duration-500">
+                  <ArrowRight size={16} weight="bold" />
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom meta row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-border-subtle/50 mt-auto">
+          {[
+            { label: "Elevation", value: "Level 8" },
+            { label: "Vibe", value: "Sunset to Midnight" },
+            { label: "Cuisine", value: "Global Tapas" },
+            { label: "Music", value: "Curated Selectors" }
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <span className="font-eyebrow text-[10px] md:text-xs text-text-muted">{item.label}</span>
+              <span className="font-sans text-sm md:text-base text-text-primary font-medium">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

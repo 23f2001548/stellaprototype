@@ -1,163 +1,93 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
-import { useReducedMotion } from "framer-motion";
 
-gsap.registerPlugin(ScrollTrigger);
-
-const galleryItems = [
-  {
-    src: "/images/hero-rooftop.jpg",
-    alt: "Stella rooftop bar with city skyline views",
-    aspect: "aspect-[3/4]",
-    width: "w-[300px] md:w-[400px]",
-    caption: "The Skyline",
-  },
-  {
-    src: "/images/cocktail-signature.jpg",
-    alt: "Signature craft cocktail at Stella",
-    aspect: "aspect-square",
-    width: "w-[260px] md:w-[320px]",
-    caption: "Craft",
-  },
-  {
-    src: "/images/gallery-rooftop-view.jpg",
-    alt: "Panoramic night view from Stella rooftop",
-    aspect: "aspect-[3/4]",
-    width: "w-[280px] md:w-[360px]",
-    caption: "Views",
-  },
-  {
-    src: "/images/dj-nightlife.jpg",
-    alt: "DJ performing at Stella nightclub",
-    aspect: "aspect-[4/3]",
-    width: "w-[340px] md:w-[480px]",
-    caption: "Energy",
-  },
-  {
-    src: "/images/food-plating.jpg",
-    alt: "Gourmet dish plating at Stella kitchen",
-    aspect: "aspect-square",
-    width: "w-[260px] md:w-[320px]",
-    caption: "Taste",
-  },
-  {
-    src: "/images/about-interior.jpg",
-    alt: "Stella lounge interior ambiance",
-    aspect: "aspect-[3/4]",
-    width: "w-[300px] md:w-[380px]",
-    caption: "Ambiance",
-  },
-  {
-    src: "/images/beer-craft.jpg",
-    alt: "Craft beer selection at Stella",
-    aspect: "aspect-[4/3]",
-    width: "w-[320px] md:w-[440px]",
-    caption: "The Ale",
-  },
+const images = [
+  { src: "/images/hero-rooftop.jpg", alt: "Rooftop ambiance" },
+  { src: "/images/beer-craft.jpg", alt: "Craft Beer Selection" },
+  { src: "/images/cocktail-signature.jpg", alt: "Signature Cocktails" },
+  { src: "/images/dj-nightlife.jpg", alt: "DJ Night Vibes" },
+  { src: "/images/food-plating.jpg", alt: "Gourmet Tapas" },
+  { src: "/images/about-interior.jpg", alt: "Stella Interior" },
 ];
 
 export default function Gallery() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const reduce = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (reduce || !wrapRef.current || !trackRef.current) return;
+    // Only apply GSAP horizontal scroll on desktop
+    const matchMedia = gsap.matchMedia();
 
-    const ctx = gsap.context(() => {
-      // Heading Split Reveal
-      if (headingRef.current) {
-        const split = new SplitType(headingRef.current, { types: "chars" });
-        gsap.from(split.chars, {
-          scrollTrigger: {
-            trigger: wrapRef.current,
-            start: "top 70%",
-          },
-          opacity: 0,
-          y: 40,
-          stagger: 0.05,
-          duration: 0.8,
-          ease: "power4.out",
-        });
-      }
-
-      // Horizontal Scroll
-      const distance = trackRef.current!.scrollWidth - window.innerWidth;
-      gsap.to(trackRef.current, {
-        x: -distance,
+    matchMedia.add("(min-width: 1024px)", () => {
+      if (!containerRef.current || !scrollRef.current) return;
+      
+      const sections = gsap.utils.toArray(".gallery-item");
+      
+      gsap.to(sections, {
+        xPercent: -100 * (sections.length - 1),
         ease: "none",
         scrollTrigger: {
-          trigger: wrapRef.current,
-          start: "top top",
-          end: () => `+=${distance}`,
+          trigger: containerRef.current,
           pin: true,
           scrub: 1,
-          invalidateOnRefresh: true,
-        },
+          end: () => `+=${scrollRef.current?.offsetWidth || 0}`,
+        }
       });
-      
-    }, wrapRef);
+    });
 
-    return () => ctx.revert();
-  }, [reduce]);
+    return () => matchMedia.revert();
+  }, []);
 
   return (
-    <section
-      ref={wrapRef}
-      id="gallery"
-      className="relative overflow-hidden bg-bg-primary border-y border-border-strong"
-    >
-      {/* Section Header (pinned with the section) */}
-      <div className="absolute top-12 md:top-20 left-6 md:left-10 z-10 pointer-events-none">
-        <span className="eyebrow block mb-2">Visuals</span>
-        <h2 ref={headingRef} className="text-6xl md:text-8xl font-[var(--font-display)] uppercase">
-          The <span className="text-accent-amber">Vibe</span>
+    <section ref={containerRef} id="gallery" className="relative bg-bg-primary overflow-hidden py-20 lg:py-0 lg:h-[100dvh] flex flex-col justify-center">
+      
+      <div className="px-6 md:px-12 mb-12 lg:absolute lg:top-32 lg:left-0 lg:z-10 lg:pointer-events-none w-full max-w-[1600px] mx-auto lg:left-1/2 lg:-translate-x-1/2">
+        <span className="font-eyebrow text-xs tracking-[0.2em] text-accent-amber mb-4 block">
+          Visuals
+        </span>
+        <h2 className="font-display text-5xl md:text-7xl lg:text-[6rem] leading-[0.9] text-text-primary tracking-tight drop-shadow-lg">
+          The <span className="text-accent-amber italic font-light">Vibe.</span>
         </h2>
       </div>
 
-      {/* Horizontal Track */}
-      <div
-        ref={trackRef}
-        className="flex items-center gap-8 md:gap-12 h-[100dvh] px-6 md:px-10 pt-20 pb-10"
-        style={{ width: "max-content" }}
+      {/* Mobile: Horizontal scrolling container. Desktop: GSAP pinned container */}
+      <div 
+        ref={scrollRef} 
+        className="flex lg:h-[60vh] w-full overflow-x-auto lg:overflow-visible snap-x snap-mandatory hide-scrollbar pl-6 md:pl-12 lg:pl-[10vw]"
       >
-        <div className="w-[10vw] shrink-0" /> {/* Spacer for intro scroll */}
-        
-        {galleryItems.map((item, i) => (
-          <div
-            key={i}
-            className={`${item.width} shrink-0 ${item.aspect} relative overflow-hidden group cursor-pointer`}
-          >
-            {/* The mask container */}
-            <div className="w-full h-full relative transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[0.96]">
-              <Image
-                src={item.src}
-                alt={item.alt}
-                fill
-                className="object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
-                sizes="(max-width: 768px) 80vw, 30vw"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Floating Caption */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                <span className="font-[var(--font-display)] text-3xl md:text-5xl uppercase tracking-widest text-text-primary drop-shadow-xl mix-blend-overlay">
-                  {item.caption}
-                </span>
+        <div className="flex gap-4 md:gap-8 pr-6 md:pr-12 lg:pr-[10vw]">
+          {images.map((img, i) => (
+            <div 
+              key={i} 
+              className="gallery-item shrink-0 w-[85vw] sm:w-[60vw] lg:w-[45vw] h-[50vh] lg:h-full relative snap-center rounded-2xl overflow-hidden group glass-panel p-2"
+            >
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                  sizes="(max-width: 768px) 85vw, (max-width: 1024px) 60vw, 45vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute bottom-6 left-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <span className="font-eyebrow text-xs text-accent-amber">{String(i + 1).padStart(2, '0')}</span>
+                  <p className="font-sans font-medium text-text-primary text-lg mt-1">{img.alt}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        
-        <div className="w-[10vw] shrink-0" /> {/* Spacer for outro scroll */}
+          ))}
+        </div>
       </div>
+      
+      {/* Custom CSS to hide scrollbar on mobile but keep functionality */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
     </section>
   );
 }

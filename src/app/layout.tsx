@@ -1,19 +1,27 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter } from "next/font/google";
+import { Fraunces, Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const displayFont = Bebas_Neue({
+const displayFont = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400"],
+  weight: ["300", "400", "600"],
+  style: ["normal", "italic"],
 });
 
 const bodyFont = Inter({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500"],
+});
+
+const eyebrowFont = Space_Grotesk({
+  variable: "--font-eyebrow",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -44,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${displayFont.variable} ${bodyFont.variable} h-full antialiased`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${eyebrowFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col grain-overlay relative">
         {children}

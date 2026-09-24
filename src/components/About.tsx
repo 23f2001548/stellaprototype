@@ -3,172 +3,159 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
-import { Wine, MusicNotes, Buildings, ForkKnife } from "@phosphor-icons/react";
-
-gsap.registerPlugin(ScrollTrigger);
-
-const highlights = [
-  { icon: Buildings, label: "8th Floor Skyline Views" },
-  { icon: MusicNotes, label: "Live DJ & Music Nights" },
-  { icon: Wine, label: "Craft Cocktails & Full Bar" },
-  { icon: ForkKnife, label: "Multi-Cuisine Kitchen" },
-];
+import { motion } from "framer-motion";
 
 export default function About() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const imageWrapRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    if (!sectionRef.current) return;
+    if (!headlineRef.current || !textRef.current) return;
+
+    const headlineSplit = new SplitType(headlineRef.current, { types: "words" });
+
     const ctx = gsap.context(() => {
-      // Heading Split
-      if (headingRef.current) {
-        const splitHeading = new SplitType(headingRef.current, { types: "lines,words" });
-        gsap.from(splitHeading.words, {
-          scrollTrigger: {
-            trigger: headingRef.current,
-            start: "top 80%",
-          },
-          y: 40,
-          opacity: 0,
-          rotationX: -45,
-          stagger: 0.05,
-          duration: 0.8,
-          ease: "back.out(1.7)",
-        });
-      }
+      // Headline reveal
+      gsap.from(headlineSplit.words, {
+        yPercent: 120,
+        opacity: 0,
+        stagger: 0.05,
+        duration: 1.2,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: headlineRef.current,
+          start: "top 80%",
+        }
+      });
 
-      // Paragraph fade
-      if (textRef.current) {
-        gsap.from(textRef.current, {
-          scrollTrigger: {
-            trigger: textRef.current,
-            start: "top 85%",
-          },
-          y: 20,
-          opacity: 0,
-          duration: 1,
-          ease: "power3.out",
-        });
-      }
+      // Text fade in
+      gsap.from(textRef.current, {
+        y: 40,
+        opacity: 0,
+        duration: 1.5,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: textRef.current,
+          start: "top 85%",
+        }
+      });
 
-      // Image Mask Reveal + Parallax
-      if (imageWrapRef.current && imageRef.current) {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: imageWrapRef.current,
-            start: "top 80%",
-          }
-        });
-
-        tl.fromTo(imageWrapRef.current, 
-          { clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)" },
-          { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)", duration: 1.5, ease: "power4.inOut" }
-        )
-        .fromTo(imageRef.current, 
-          { scale: 1.4 }, 
-          { scale: 1, duration: 2, ease: "power3.out" }, "-=1.5"
-        );
-
-        gsap.to(imageRef.current, {
-          yPercent: 15,
+      // Images parallax & scale
+      imageRefs.current.forEach((img, i) => {
+        if (!img) return;
+        
+        // Parallax wrapper
+        gsap.to(img, {
+          yPercent: i % 2 === 0 ? -15 : 15,
           ease: "none",
           scrollTrigger: {
-            trigger: imageWrapRef.current,
+            trigger: containerRef.current,
             start: "top bottom",
             end: "bottom top",
-            scrub: true,
+            scrub: 1,
           }
         });
-      }
+        
+        // Inner image scale down on scroll
+        const innerImg = img.querySelector('img');
+        if (innerImg) {
+          gsap.fromTo(innerImg, 
+            { scale: 1.3 },
+            { 
+              scale: 1, 
+              ease: "none",
+              scrollTrigger: {
+                trigger: img,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+              }
+            }
+          );
+        }
+      });
+    }, containerRef);
 
-      // Highlights Stagger
-      if (statsRef.current) {
-        gsap.from(statsRef.current.children, {
-          scrollTrigger: {
-            trigger: statsRef.current,
-            start: "top 85%",
-          },
-          y: 30,
-          opacity: 0,
-          stagger: 0.1,
-          duration: 0.8,
-          ease: "power3.out",
-        });
-      }
-    }, sectionRef);
-
-    return () => ctx.revert();
+    return () => {
+      headlineSplit.revert();
+      ctx.revert();
+    };
   }, []);
 
   return (
-    <section ref={sectionRef} id="experience" className="section-padding overflow-hidden">
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        
-        {/* Asymmetric layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative">
+    <section ref={containerRef} id="about" className="relative py-24 md:py-40 bg-bg-primary overflow-hidden">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           
-          {/* Text Side (lg: 5 cols, offset by 1) */}
-          <div className="order-2 lg:order-1 lg:col-span-5 lg:col-start-2 z-10">
-            <span className="eyebrow block mb-6">The Experience</span>
-            <h2 
-              ref={headingRef}
-              className="font-[var(--font-display)] text-5xl md:text-7xl leading-[0.9] mb-8"
-              style={{ perspective: "400px" }}
+          {/* Left Side: Images */}
+          <div className="lg:col-span-6 relative h-[60vh] md:h-[80vh] w-full">
+            <div 
+              ref={el => { imageRefs.current[0] = el; }}
+              className="absolute top-0 left-0 w-[65%] h-[70%] rounded-2xl overflow-hidden glass-panel p-2 z-10"
             >
-              Where the City <br />
-              <span className="text-accent-amber">Meets the Sky</span>
-            </h2>
-
-            <p ref={textRef} className="text-text-secondary text-base md:text-lg max-w-md mb-12">
-              Perched on the 8th floor of Akash Mall, Stella offers an escape
-              above Kota&apos;s skyline. From signature cocktails and craft ales to
-              live DJ sets under the open sky, every evening here is designed to
-              be unforgettable.
-            </p>
-
-            <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {highlights.map((item, i) => (
-                <div
-                  key={item.label}
-                  className="group flex items-start gap-4 p-5 border-glow bg-bg-card"
-                >
-                  <item.icon
-                    size={28}
-                    weight="duotone"
-                    className="text-accent-amber shrink-0 transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <span className="text-sm text-text-primary font-medium mt-1 leading-snug">
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Image Side (lg: 6 cols, offset by 0 to overlap slightly) */}
-          <div className="order-1 lg:order-2 lg:col-span-6 lg:-ml-12 relative z-0">
-            <div ref={imageWrapRef} className="relative aspect-[3/4] lg:aspect-[4/5] overflow-hidden">
-              <div ref={imageRef} className="absolute inset-[-10%] w-[120%] h-[120%]">
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
                 <Image
                   src="/images/about-interior.jpg"
-                  alt="Stella lounge interior with warm amber lighting"
+                  alt="Stella Interior Design"
                   fill
                   className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-transparent to-transparent opacity-60" />
               </div>
             </div>
             
-            {/* Decorative element */}
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 border border-accent-amber/20 rounded-full blur-[2px] hidden lg:block" />
+            <div 
+              ref={el => { imageRefs.current[1] = el; }}
+              className="absolute bottom-0 right-0 w-[55%] h-[60%] rounded-2xl overflow-hidden glass-panel p-2 z-20"
+            >
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <Image
+                  src="/images/cocktail-signature.jpg"
+                  alt="Signature Cocktails at Stella"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Content */}
+          <div className="lg:col-span-6 lg:pl-10 relative z-30">
+            <span className="font-eyebrow text-xs tracking-[0.2em] text-accent-amber mb-6 block">
+              The Architecture of Night
+            </span>
+            
+            <div className="line overflow-hidden mb-8">
+              <h2 ref={headlineRef} className="font-display text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.9] text-text-primary tracking-tight">
+                Designed to <br/>
+                <span className="text-accent-amber italic font-light">Elevate.</span>
+              </h2>
+            </div>
+            
+            <p ref={textRef} className="text-lg md:text-xl text-text-secondary font-light leading-relaxed max-w-xl mb-12">
+              Situated on the 8th floor of Akash Mall, Stella breaks the boundaries of traditional nightlife. We merged raw brutalist architecture with warm amber lighting to create a space that feels both infinitely expansive and intimately private. 
+              <br/><br/>
+              Whether you are here for the sunset acoustic sets or the midnight electronic sessions, the space adapts to the rhythm of the night.
+            </p>
+            
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-fit"
+            >
+              <a href="#menu" className="group flex items-center gap-4 text-text-primary font-medium tracking-wide">
+                <span className="border-b border-accent-amber/30 group-hover:border-accent-amber pb-1 transition-colors">
+                  Explore the Menu
+                </span>
+                <span className="h-8 w-8 rounded-full border border-border-subtle flex items-center justify-center group-hover:bg-text-primary group-hover:text-bg-primary transition-all">
+                  →
+                </span>
+              </a>
+            </motion.div>
           </div>
           
         </div>
