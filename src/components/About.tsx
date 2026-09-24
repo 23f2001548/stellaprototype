@@ -29,7 +29,7 @@ export default function About() {
     const ctx = gsap.context(() => {
       // Heading Split
       if (headingRef.current) {
-        const splitHeading = new SplitType(headingRef.current, { types: "lines, words" });
+        const splitHeading = new SplitType(headingRef.current, { types: "lines,words" });
         gsap.from(splitHeading.words, {
           scrollTrigger: {
             trigger: headingRef.current,

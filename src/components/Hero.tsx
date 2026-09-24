@@ -18,7 +18,7 @@ export default function Hero() {
     if (!headlineRef.current || !taglineRef.current) return;
 
     // Split text
-    const splitHeadline = new SplitType(headlineRef.current, { types: "chars, words" });
+    const splitHeadline = new SplitType(headlineRef.current, { types: "chars,words" });
     const splitTagline = new SplitType(taglineRef.current, { types: "words" });
 
     const ctx = gsap.context(() => {

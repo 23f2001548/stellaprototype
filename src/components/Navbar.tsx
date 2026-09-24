@@ -132,7 +132,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 40, rotateX: -45 }}
                 animate={{ opacity: 1, y: 0, rotateX: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: 0.2 + i * 0.05, duration: 0.5, ease: "back.out(1.5)" }}
+                transition={{ delay: 0.2 + i * 0.05, duration: 0.5, ease: "backOut" }}
                 style={{ perspective: "400px" }}
               >
                 {link.label}
